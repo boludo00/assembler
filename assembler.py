@@ -120,11 +120,12 @@ def handle_line(line, outfile):
             func = MASTER_LOOKUP[line[0]]["func"]
             rs = reg_to_num(line[1])
             rs = as_binary(rs)
-            rt = reg_to_num(line[2])
-            rt = as_binary(rt)[3:]
-            # print line, rs
+            if len(line) > 2:
+                rt = reg_to_num(line[2])
+                rt = as_binary(rt)[3:]
+            else:
+                rt = "0"
             outfile.write(str(opcode + rs + rt + func) + sep)
-            # handle B type
     return 0
 
 
