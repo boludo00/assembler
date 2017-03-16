@@ -1,0 +1,5 @@
+setacc $r0
+movi 0
+setacc $r1
+movi 0
+match $r0 $r1

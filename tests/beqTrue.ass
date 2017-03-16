@@ -1,0 +1,7 @@
+setacc $s0
+movi 0
+setacc $r0
+movi 10
+setacc $r1 
+movi 10
+beq $r0 $s0

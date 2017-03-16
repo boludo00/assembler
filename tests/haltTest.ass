@@ -1,0 +1,6 @@
+setacc $r0
+movi 5
+setacc $r1
+movi -2
+add $r1
+halt

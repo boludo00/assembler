@@ -1,0 +1,466 @@
+Mult:
+setacc  $r7   //The register used for addressing $r7
+addi  1    //$r7++
+ld   $r1    //$r1 = Mem[1]   Ahi $r1 Para not accumulator
+addi  1
+ld   $r2   //$r2 = Mem[2]  Alo
+addi  1
+ld   $r3   //$r3 = Mem[3]  Bhi
+addi  1
+ld   $r4   //$r4 = Mem[4]  Blo
+
+ldmask $r5 1     // $r5 = Ox80 (special instruction)
+
+setacc  $r6
+mov   $r1   //$r6 = 0 + r1
+and   $r5   //$r6 = $r1 & $r5
+
+//Twos complement in case
+beqZero $r6 CheckNext  // Only execute this if not equal to 0
+setacc   $r2
+flip  $r2   //$r2 = $r2 ^ 0xFF to flip the bits
+addi   1      //(r2 rCarry) = sum(r2 1);
+setacc   $r1
+flip  $r1   //$r1 = $r1 ^ $r7;
+add  $rCarry  //(R1 null) = sum(r1 rCarry);
+
+CheckNext:
+setacc   $r8   //$r8 = r5 & r3;
+mov  $r5
+and  $r3
+
+beqZero $r8 StartMult  //Skip the value is not negative
+setacc   $r4
+flip  $r4   //r4 = r4 ^ 0xFF;
+addi  1   //r4 rCarry) = sum(r4 1);
+setacc   $r3
+flip  $r3   //r3 = r3 ^ r7;
+add  $rCarry  //(r3 Null) = sum(r3 rCarry);
+
+StartMult:
+
+/** **   helpMult(mem[2] mem[4] 15 16) ****/
+ldmask    $r5  0   //$r5 = 0x01
+/* $r6 would be the sum $r8 would be the counter */
+setacc  $r8
+movi  0
+setacc  $r10   //$r10 = r2; // This would be like the A
+mov  $r2
+
+Loop1:
+
+setacc  $r9   //$r9 = r5 & r4
+mov  $r5
+and  $r4
+beqZero     $r9  NoAdd
+setacc  $r6   //(r6 rCarry) = add($r6 $r10);
+add  $r10
+setacc  $r7
+movi  15   //Accumulate the carries also
+ld  $r11
+setacc  $r11
+add  $rCarry
+st  $r11   //$r7 is at 15 right now
+
+NoAdd:
+
+sllOne   $r10   //r10 = r10 << 1
+sllOne   $r5    //r5 = r5 << 1
+setacc  $r8
+addi   1
+bleq   8  Loop1 //while(r8 <= 8 redo loop)
+
+/********** Done with the LSB ****************/
+setacc  $r7
+movi  16   //$r7 will now be used for addressing
+st  $r6   //Store the sum
+movi  15
+ld  $r11
+
+setacc  $r6
+mov  $r11   //Move the carry sum from the LSB comps
+ldmask $r5 1  //$r5 = 0x80;// Maxer again
+
+
+
+setacc  $r8
+movi  0   //$r8 = 0 Reset the counter
+
+setacc  $r10
+mov  $r2   //$r10 = r2// Reset the multiplier
+
+Loop2:
+
+srlOne  $r10
+setacc  $r9   //$r9 = r5 & r4;
+mov  $r5
+and  $r4
+beqZero $r9 NoAdd // Do not bother adding if it is 0
+setacc  $r6
+add  $r10
+
+NoAdd:
+
+srlOne  $r5
+setacc  $r7
+addi  1
+bleq   8  Loop2
+
+setacc $r7
+movi   15
+st   $r6   //store the value in mem[15]
+
+
+/* Symmetrically repeat 3 more times
+//helpMult(mem[1], mem[4], 13, 14); */
+ldmask    $r5  0   //$r5 = 0x01
+/* $r6 would be the sum, $r8 would be the counter */
+setacc  $r8
+movi  0
+setacc  $r10   //$r10 = r1; // This would be like the A
+mov  $r1
+
+Loop1:
+
+setacc  $r9   //$r9 = r5 & r4
+mov  $r5
+and  $r4
+beqZero $r9  NoAdd
+setacc  $r6   //(r6, rCarry) = add($r6, $r10);
+add  $r10
+setacc  $r7
+movi  13   //Accumulate the carries also
+ld  $r11
+setacc  $r11
+add  $rCarry
+st  $r11   //$r7 is at 15 right now
+
+NoAdd:
+
+sllOne   $r10   //r10 = r10 << 1
+sllOne   $r5    //r5 = r5 << 1
+setacc  $r8
+addi   1
+bleq   8  Loop1 //while(r8 <= 8 redo loop)
+
+/********** Done with the LSB ****************/
+setacc  $r7
+movi  14   //$r7 will now be used for addressing
+st  $r6   //Store the sum
+movi  13
+ld  $r11
+
+setacc  $r6
+mov  $r11   //Move the carry sum from the LSB comps
+ldmask $r5 1  //$r5 = 0x80;// Maxer again
+
+
+
+setacc  $r8
+movi  0   //$r8 = 0 Reset the counter
+
+setacc  $r10
+mov  $r1   //$r10 = r1// Reset the multiplier
+
+Loop2:
+
+srlOne  $r10
+setacc  $r9   //$r9 = r5 & r4;
+mov  $r5
+and  $r4
+beqZero $r9 NoAdd // Do not bother adding if it is 0
+setacc  $r6
+add  $r10
+
+NoAdd:
+
+srlOne  $r5
+setacc  $r7
+addi  1
+bleq   8  Loop2
+
+setacc $r7
+movi   13
+st   $r6   //store the value in mem[13]
+
+/*********  helpMult(mem[2], mem[3], 11, 12)  ***************/
+ldmask    $r5  0   //$r5 = 0x01
+/* $r6 would be the sum, $r8 would be the counter */
+setacc  $r8
+movi  0
+setacc  $r10  // $r10 = r2; // This would be like the A
+add  $r2
+
+Loop1:
+
+setacc  $r9   //$r9 = r5 & r3
+mov  $r5
+and  $r3
+beqZero     $r9  NoAdd
+setacc  $r6   //(r6, rCarry) = add($r6, $r10);
+add  $r10
+setacc  $r7
+movi  11   //Accumulate the carries also
+ld  $r11
+setacc  $r11
+add  $rCarry
+st  $r11   //$r7 is at 15 right now
+
+NoAdd:
+
+sllOne   $r10   //r10 = r10 << 1
+sllOne   $r5    //r5 = r5 << 1
+setacc  $r8
+addi  1
+bleq   8  Loop1 //while(r8 <= 8 redo loop)
+
+/********** Done with the LSB ****************/
+setacc  $r7
+movi  12   //$r7 will now be used for addressing
+st  $r6   //Store the sum in mem[12]
+movi  11
+ld  $r11
+
+setacc  $r6
+mov  $r11   //Move the carry sum from the LSB comps
+ldmask $r5 1  //$r5 = 0x80;// Maxer again
+
+
+
+setacc  $r8
+movi  0   //$r8 = 0 Reset the counter
+
+setacc  $r10
+mov  $r2   //$r10 = r2// Reset the multiplier
+
+Loop2:
+
+srlOne  $r10
+setacc  $r9   //$r9 = r5 & r3;
+mov  $r5
+and  $r3
+beqZero $r9 NoAdd // Do not bother adding if it is 0
+setacc  $r6
+add  $r10
+
+NoAdd:
+
+srlOne  $r5
+setacc  $r7
+addi  1
+bleq   8  Loop2
+
+setacc $r7
+movi   11
+st   $r6   //store the value in mem[11]
+
+
+/* Symmetrically repeat 3 more times
+//helpMult(mem[1], mem[4], 9, 10); */
+ldmask    $r5  0   //$r5 = 0x01
+/* $r6 would be the sum, $r8 would be the counter */
+setacc  $r8
+movi  0
+setacc  $r10   //$r10 = r1; // This would be like the A
+add  $r1
+
+Loop1:
+
+setacc  $r9   //$r9 = r5 & r4
+mov  $r5
+and  $r4
+beqZero     $r9  NoAdd
+setacc  $r6   //(r6, rCarry) = add($r6, $r10);
+add  $r10
+setacc  $r7
+movi  9   //Accumulate the carries also
+ld  $r11
+setacc  $r11
+add  $rCarry
+st  $r11   //$r7 is at 15 right now
+
+NoAdd:
+
+sllOne   $r10   //r10 = r10 << 1
+sllOne   $r5    //r5 = r5 << 1
+setacc  $r8
+addi  1
+bleq   8  Loop1: //while(r8 <= 8 redo loop)
+
+/********** Done with the LSB ****************/
+setacc  $r7
+movi  10   //$r7 will now be used for addressing
+st  $r6   //Store the sum ni mem[10]
+movi  9
+ld  $r11
+
+setacc  $r6
+mov  $r11   //Move the carry sum from the LSB comps
+ldmask $r5 1  //$r5 = 0x80;// Maxer again
+
+
+
+setacc  $r8
+movi  0   //$r8 = 0 Reset the counter
+
+setacc  $r10
+mov  $r1   //$r10 = r1// Reset the multiplier
+
+Loop2:
+
+srlOne  $r10
+setacc  $r9   //$r9 = r5 & r4;
+mov  $r5
+and  $r4
+beqZero $r9 NoAdd // Do not bother adding if it is 0
+setacc  $r6
+add  $r10
+
+NoAdd:
+
+srlOne  $r5
+setacc  $r7
+addi  1
+bleq   8  Loop2
+
+setacc $r7
+movi   9
+st   $r6   //store the value in mem[9]
+
+/*****  Now to add all the sums in memory ******/
+setacc   $r7
+movi  16    //$r7 = 16
+ld  $r1
+movi  8    //$r7 = 8
+st   $r1    //mem[8] = $r1
+movi  15    //$r7 = 15
+ld  $r1    //$r1 = mem[15]
+movi  14    //$r7 = 14
+ld   $r2     //$r2 = mem[14]
+
+setacc   $r1
+add  $r2    //$(r1, rCarry) = $r1 + $r2
+setacc   $r7
+movi  6
+st   $rCarry   //$rCarry = mem[6];
+movi  12
+ld   $r2    //$r2 = mem[12];
+setacc  $r1
+add  $r2    //$(r1, rCarry) = $r1 + $r2
+
+setacc   $r7
+movi  7
+st  $r1    //Mem[7] = $r1
+movi  6
+ld  $r3    //$r3 = Mem[6] has only the rCarry
+
+setacc  $r3
+add  $rCarry   //$r3 = add(r3, rCarry); add the second carry
+st  $r3     //mem[6] = $r3;
+
+setacc  $r7
+movi  10
+ld  $r1    //$r1 = mem[10]
+movi  13
+ld   $r2    //$r2 = mem[13]
+setacc  $r1
+add   $r2    //$r1 = $r1 + $r2
+
+setacc  $r7
+movi  5
+st  $rCarry   //store carry in mem[5];
+movi  11
+ld  $r2    //$r2 = mem[11]
+
+setacc  $r1
+add  $r2    //$r1 = $r1 + $r2
+
+setacc   $r7
+movi  5
+ld  $r2    //load the previous carry in mem[5]
+
+setacc  $r2
+add  $rCarry
+st  $r2    //update the sum in mem[5]
+
+setacc  $r7
+movi  6
+ld  $r2    //$r2 =  mem[6] // Remember the carry’s
+
+setacc   $r1
+add   $r2    //$ add carry $r1 = $r1 + mem[6]
+st  $r1     //store the sum in mem[6];
+
+setacc  $r7
+movi  5
+ld  $r1    //$r1 = mem[5]
+
+setacc   $r1
+add  $rCarry
+st  $r1    //mem[5] = $rCarry + mem[5]; Final
+
+setacc  $r7
+movi  9
+ld   $r1    //$r1 = mem[9]
+
+setacc  $r7
+movi   5
+ld   $r2    //$r2 = mem[5] // The propagated carry’s;
+
+setacc  $r1
+add  $r2    //$r1 = $r1 + $r2
+st  $r1    //mem[5] = $r1 + $r2
+
+
+/* Check if the result should be negative  */
+setacc  $r7
+movi  1
+ld  $r1
+movi   3
+ld  $r2
+ldmask   $r5 1   //$r5 = 0x80
+setacc  $r1
+and  $r5
+setacc  $r2
+and   $r5
+setacc   $r1
+add   $r2
+beqZero $r1  Done
+/************ Do the twos complement, in the case that the result was negative **/
+setacc  $r7
+movi  5
+ld   $r1
+movi   6
+ld   $r2
+movi   7
+ld   $r3
+movi   8
+ld  $r4
+
+/*** First flip all the bits **/
+flip   $r4    //Really means xor with 0xFF
+flip   $r3    //Really means xor with 0xFF
+flip   $r2    //Really means xor with 0xFF
+flip   $r1    //Really means xor with 0xFF
+
+/***** Then add the one *****/
+setacc   $r4
+addi   1
+setacc   $r3
+add   $rCarry
+setacc   $r2
+add   $rCarry
+setacc   $r1
+add   $rCarry
+
+/****** Store the result back *****/
+setacc  $r7
+movi  5
+st  $r1
+movi  6
+st  $r2
+movi  7
+st  $r3
+movi  8
+st  $r4
+Done:

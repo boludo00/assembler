@@ -1,0 +1,4 @@
+setacc $s0    // some comment
+setacc $s1
+setacc $r0
+setacc $r1

@@ -1,0 +1,60 @@
+stringMatch:
+setacc   $r7
+movi  9
+ld  $r1      //The target to be loaded
+
+setacc  $r1
+andi   15     //Get the lower 4 bits for the target
+ldmask  $r2 3    //$r2 = 32 out counter
+ldmask  $r3  3
+sllOne  $r3     //$r3 = 64
+
+setacc  $r5     //outside loop to reduce instr. count
+movi  5
+
+OuterLoop:
+setacc  $r4
+mov  $r1     //$r4 = $r1 also $r4 is the temp target
+
+setacc  $r6     //Initialize the inner loop counter
+movi  0
+
+setacc   $r7
+mov  $r2
+ld  $r8     //$r8 = mem[$r2]
+
+setacc  $r9     //$r9 is the count
+movi   0
+
+setacc  $r12
+movi  15
+
+InnerLoop:
+setacc  $r11
+mov  $r8
+add  $r12
+match  $r4  $r11
+
+setacc  $r9
+add  $rCarry    //$r9(count) += rCarry
+sllOne  $r4
+sllOne  $r12
+
+setacc   $r6
+addi   1     //$r6++;
+bleq   $r5  InnerLoop   //$r6 <= 5
+beqZero $r9  DoneAdd
+
+setacc  $r7
+mov   $r9
+addi  9
+ld  $r10
+
+setacc   $r10
+addi  1
+st  $r10     //mem[rCount]++
+
+DoneAdd:
+setacc  $r2
+addi  1
+bleq  $r3 OuterLoop

@@ -1,0 +1,17 @@
+setacc $r0
+movi -8
+movi -7
+movi -6
+movi -5
+movi -4
+movi -3
+movi -2
+movi -1
+movi 0
+movi 1
+movi 2
+movi 3
+movi 4
+movi 5
+movi 6
+movi 7

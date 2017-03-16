@@ -1,0 +1,4 @@
+ldmask $r0 0
+ldmask $r1 1
+ldmask $r2 2
+ldmask $r3 3

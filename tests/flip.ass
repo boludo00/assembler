@@ -1,0 +1,3 @@
+setacc $r0
+movi 10
+flip $r0

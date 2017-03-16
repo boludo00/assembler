@@ -1,0 +1,102 @@
+maxHam:
+setacc $r0
+movi 16
+addi 16
+addi 16
+addi 16
+addi 16
+addi 16
+addi 16
+addi 16
+
+setacc $r1
+movi 0
+
+setacc $r2
+movi 0
+
+setacc $r10
+movi 0
+
+setacc $r3
+movi 16
+addi 4
+
+outerloop:
+
+setacc $r2
+add $r0
+ld $r3
+
+setacc $r4
+mov $r2
+
+
+setacc $r10
+
+setacc $r0
+addi 1
+
+innerloop:
+
+setacc $r5
+movi  0
+add $r4
+ld $r5
+
+setacc $r6
+movi  0
+
+setacc $r7
+movi  0
+setacc $r8
+movi  8
+
+innerloop2:
+
+setacc $r9
+movi  1
+and  $r3 $r9
+setacc $r10
+movi 1
+and $r5 $r10
+
+beq $r9  doShift
+setacc $r6
+addi 1
+
+doShift:
+srlOne $r9
+
+srlOne $r10
+
+setacc $r7
+addi   1
+
+bleq $r8  innerloop2
+
+setacc $r4
+
+bleq $r3 innerloop
+
+setacc $r1
+mov   $r6
+
+
+setacc $r10
+addi  1
+bleq $r3 outerloop
+
+setacc $r11
+movi 16
+sllOne $r11
+sllOne $r11
+sllOne $r11
+setacc $r12
+movi 1
+flip $r12
+addi 1
+setacc $r11
+add $r12
+st $r1
+halt

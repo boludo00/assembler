@@ -1,0 +1,8 @@
+setacc $r0
+movi 5
+addi 5
+sllOne $r0
+setacc $r1
+movi 6
+addi 6
+srlOne $r1
