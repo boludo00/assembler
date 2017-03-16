@@ -6,7 +6,7 @@ beqZero B 11 01
 beq B 11 10
 match B 11 11
 ldmask G 10 0
-flip G 00 1
+flip G 10 1
 add J 00 011
 addi H 01 000
 mov J 00 100
