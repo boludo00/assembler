@@ -3,7 +3,11 @@ import re
 import sys
 
 DEBUG = True
+COMMENTS = False
 ASS_FILE = sys.argv[1]
+if len(sys.argv) > 2:
+    if sys.argv[2] == "-c":
+        COMMENTS = True
 
 if "Test" in ASS_FILE:
     DEBUG = True
@@ -41,6 +45,9 @@ def handle_line(line, outfile):
             return a 9 bit machine code line given a line
             of assembly
     """
+    sep = "\n"
+    if COMMENTS:
+        sep = "\t\t//" + " ".join(line) + "\n"
     # print "Handling line ", line
     if len(line) >= 1:
         # skip labels
@@ -58,8 +65,8 @@ def handle_line(line, outfile):
             rs = line[1]
             rs = reg_to_num(rs)
             rs = as_binary(rs)
-            outfile.write(str(opcode + rs + func) +
-                          "\t\t//" + " ".join(line) + "\n")
+                
+            outfile.write(str(opcode + rs + func) + sep)
 
         elif inst_type == "G":
             # handle G type
@@ -72,17 +79,14 @@ def handle_line(line, outfile):
                 rs = as_binary(rs)
                 mask_selector = int(line[2])
                 mask_selector = bin(mask_selector)[2:].zfill(2)
-                outfile.write(str(opcode + rs + mask_selector +
-                                  func) + "\t\t//" + " ".join(line) + "\n")
+                outfile.write(str(opcode + rs + mask_selector + func + sep))
             else:
-                # print line
                 opcode = MASTER_LOOKUP[line[0]]["opcode"]
                 func = MASTER_LOOKUP[line[0]]["func"]
                 rs = reg_to_num(line[1])
                 rs = as_binary(rs)
                 mask_selector = "10"
-                outfile.write(str(opcode + rs + mask_selector +
-                                  func) + "\t\t//" + " ".join(line) + "\n")
+                outfile.write(str(opcode + rs + mask_selector + func + sep))
 
         elif inst_type == "H":
             # handle H type
@@ -103,17 +107,13 @@ def handle_line(line, outfile):
             # print "immediate value in binary: ", immediate
                 if len(immediate) > 4:
                     immediate = "1111"
-                outfile.write(str(opcode + immediate + func) +
-                              "\t\t//" + " ".join(line) + "\n")
+                outfile.write(str(opcode + immediate + func) + sep)
             elif len(line) == 1 and line[0] == "halt":
                 immediate = "0000"
-                outfile.write(str(opcode + immediate + func) +
-                              "\t\t//" + " ".join(line) + "\n")
+                outfile.write(str(opcode + immediate + func) + sep)
             elif len(line) == 1 and line[0] == "movc":
                 immediate = "1111"
-                outfile.write(str(opcode + immediate + func) +
-                              "\t\t//" + " ".join(line) + "\n")
-
+                outfile.write(str(opcode + immediate + func) + sep)
 
         elif inst_type == "B":
             # print line
@@ -123,8 +123,7 @@ def handle_line(line, outfile):
             rs = as_binary(rs)
             rt = "0"
             # print line, rs
-            outfile.write(str(opcode + rs + rt + func) +
-                          "\t\t//" + " ".join(line) + "\n")
+            outfile.write(str(opcode + rs + rt + func) + sep)
             # handle B type
     return 0
 
