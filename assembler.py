@@ -116,12 +116,12 @@ def handle_line(line, outfile):
                 outfile.write(str(opcode + immediate + func) + sep)
 
         elif inst_type == "B":
-            # print line
             opcode = MASTER_LOOKUP[line[0]]["opcode"]
             func = MASTER_LOOKUP[line[0]]["func"]
             rs = reg_to_num(line[1])
             rs = as_binary(rs)
-            rt = "0"
+            rt = reg_to_num(line[2])
+            rt = as_binary(rt)[3:]
             # print line, rs
             outfile.write(str(opcode + rs + rt + func) + sep)
             # handle B type
